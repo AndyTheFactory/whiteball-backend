@@ -1,17 +1,20 @@
 """Product model."""
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, Text, Index
+
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from datetime import datetime
-import uuid
+
 from app.db.base import Base
 
 
 class Product(Base):
     """Product model."""
-    
+
     __tablename__ = "products"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     company_id = Column(UUID(as_uuid=True), ForeignKey("companies.id"), nullable=False, index=True)
     sku = Column(String(100), nullable=False, index=True)
@@ -23,12 +26,10 @@ class Product(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     # Relationships
     company = relationship("Company")
     packaging_associations = relationship("ProductPackagingAssociation", back_populates="product")
-    
+
     # Unique constraint on company_id and sku
-    __table_args__ = (
-        Index("ix_products_company_sku", "company_id", "sku", unique=True),
-    )
+    __table_args__ = (Index("ix_products_company_sku", "company_id", "sku", unique=True),)

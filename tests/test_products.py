@@ -1,9 +1,8 @@
 """Product tests."""
-import pytest
+
 from fastapi.testclient import TestClient
-from app.models.product import Product
+
 from app.models.user import User
-import uuid
 
 
 def test_create_product(client: TestClient, auth_headers: dict, test_user: User):
@@ -20,7 +19,7 @@ def test_create_product(client: TestClient, auth_headers: dict, test_user: User)
         },
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 201
     data = response.json()
     assert data["sku"] == "SKU-001"
@@ -40,7 +39,7 @@ def test_create_product_duplicate_sku_same_company(client: TestClient, auth_head
         headers=auth_headers,
     )
     assert response1.status_code == 201
-    
+
     # Try to create duplicate
     response2 = client.post(
         "/api/v1/products",
@@ -50,7 +49,7 @@ def test_create_product_duplicate_sku_same_company(client: TestClient, auth_head
         },
         headers=auth_headers,
     )
-    
+
     assert response2.status_code == 409
     assert response2.json()["detail"]["code"] == "PRODUCT_DUPLICATE"
 
@@ -67,12 +66,12 @@ def test_list_products(client: TestClient, auth_headers: dict):
             },
             headers=auth_headers,
         )
-    
+
     response = client.get(
         "/api/v1/products",
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 3
@@ -89,12 +88,12 @@ def test_search_products_by_sku(client: TestClient, auth_headers: dict):
         },
         headers=auth_headers,
     )
-    
+
     response = client.get(
         "/api/v1/products?search=SEARCH",
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 1
@@ -112,12 +111,12 @@ def test_filter_products_by_category(client: TestClient, auth_headers: dict):
         },
         headers=auth_headers,
     )
-    
+
     response = client.get(
         "/api/v1/products?category=Electronics",
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 1
@@ -135,12 +134,12 @@ def test_get_product_detail(client: TestClient, auth_headers: dict):
         headers=auth_headers,
     )
     product_id = create_response.json()["id"]
-    
+
     response = client.get(
         f"/api/v1/products/{product_id}",
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["sku"] == "DETAIL-001"
@@ -159,7 +158,7 @@ def test_update_product(client: TestClient, auth_headers: dict):
         headers=auth_headers,
     )
     product_id = create_response.json()["id"]
-    
+
     # Update product
     response = client.patch(
         f"/api/v1/products/{product_id}",
@@ -169,7 +168,7 @@ def test_update_product(client: TestClient, auth_headers: dict):
         },
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "Updated Name"
@@ -188,15 +187,15 @@ def test_delete_product(client: TestClient, auth_headers: dict):
         headers=auth_headers,
     )
     product_id = create_response.json()["id"]
-    
+
     # Delete product
     response = client.delete(
         f"/api/v1/products/{product_id}",
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 204
-    
+
     # Verify product is inactive
     get_response = client.get(
         f"/api/v1/products/{product_id}",

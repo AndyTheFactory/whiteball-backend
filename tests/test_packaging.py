@@ -1,7 +1,6 @@
 """Packaging tests."""
-import pytest
+
 from fastapi.testclient import TestClient
-from decimal import Decimal
 
 
 def test_create_packaging_item(client: TestClient, auth_headers: dict):
@@ -18,7 +17,7 @@ def test_create_packaging_item(client: TestClient, auth_headers: dict):
         },
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 201
     data = response.json()
     assert data["type"] == "primary"
@@ -40,7 +39,7 @@ def test_update_packaging_item(client: TestClient, auth_headers: dict):
         headers=auth_headers,
     )
     item_id = create_response.json()["id"]
-    
+
     # Update item
     response = client.patch(
         f"/api/v1/packaging-items/{item_id}",
@@ -50,7 +49,7 @@ def test_update_packaging_item(client: TestClient, auth_headers: dict):
         },
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "Updated Name"
@@ -71,12 +70,12 @@ def test_list_packaging_items(client: TestClient, auth_headers: dict):
             },
             headers=auth_headers,
         )
-    
+
     response = client.get(
         "/api/v1/packaging-items",
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 3
@@ -94,7 +93,7 @@ def test_associate_packaging_with_product(client: TestClient, auth_headers: dict
         headers=auth_headers,
     )
     product_id = product_response.json()["id"]
-    
+
     # Associate packaging
     response = client.post(
         f"/api/v1/products/{product_id}/packaging",
@@ -109,7 +108,7 @@ def test_associate_packaging_with_product(client: TestClient, auth_headers: dict
         },
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 201
     data = response.json()
     assert data["type"] == "primary"
@@ -128,7 +127,7 @@ def test_update_product_packaging_association(client: TestClient, auth_headers: 
         headers=auth_headers,
     )
     product_id = product_response.json()["id"]
-    
+
     # Associate packaging
     assoc_response = client.post(
         f"/api/v1/products/{product_id}/packaging",
@@ -144,7 +143,7 @@ def test_update_product_packaging_association(client: TestClient, auth_headers: 
         headers=auth_headers,
     )
     association_id = assoc_response.json()["association_id"]
-    
+
     # Update association
     response = client.patch(
         f"/api/v1/products/{product_id}/packaging/{association_id}",
@@ -154,7 +153,7 @@ def test_update_product_packaging_association(client: TestClient, auth_headers: 
         },
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["quantity_per_product_unit"] == 2
@@ -173,7 +172,7 @@ def test_remove_packaging_from_product(client: TestClient, auth_headers: dict):
         headers=auth_headers,
     )
     product_id = product_response.json()["id"]
-    
+
     # Associate packaging
     assoc_response = client.post(
         f"/api/v1/products/{product_id}/packaging",
@@ -188,15 +187,15 @@ def test_remove_packaging_from_product(client: TestClient, auth_headers: dict):
         headers=auth_headers,
     )
     association_id = assoc_response.json()["association_id"]
-    
+
     # Remove association
     response = client.delete(
         f"/api/v1/products/{product_id}/packaging/{association_id}",
         headers=auth_headers,
     )
-    
+
     assert response.status_code == 204
-    
+
     # Verify product detail doesn't include the packaging
     detail_response = client.get(
         f"/api/v1/products/{product_id}",

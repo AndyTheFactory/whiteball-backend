@@ -1,21 +1,22 @@
 """Pytest configuration and fixtures."""
-import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from fastapi.testclient import TestClient
+
 import uuid
-from app.main import create_app
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+
+from app.api.deps import get_db
+from app.core.security import get_password_hash
 from app.db.base import Base
+from app.main import create_app
 from app.models.company import Company
 from app.models.user import User
-from app.core.security import get_password_hash
-from app.api.deps import get_db
 
 # Use in-memory SQLite for tests
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -33,12 +34,12 @@ def db():
 def client(db: Session):
     """Create test client."""
     app = create_app()
-    
+
     def override_get_db():
         yield db
-    
+
     app.dependency_overrides[get_db] = override_get_db
-    
+
     return TestClient(app)
 
 
@@ -83,7 +84,7 @@ def auth_headers(client: TestClient, test_user: User):
         json={
             "email": test_user.email,
             "password": "test123",
-        }
+        },
     )
     assert response.status_code == 200
     token = response.json()["access_token"]

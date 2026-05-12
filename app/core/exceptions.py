@@ -1,10 +1,11 @@
 """Custom application exceptions."""
+
 from fastapi import HTTPException, status
 
 
 class AppException(HTTPException):
     """Base application exception."""
-    
+
     def __init__(
         self,
         code: str,
@@ -22,7 +23,7 @@ class AppException(HTTPException):
 
 class AuthException(AppException):
     """Authentication exception."""
-    
+
     def __init__(self, code: str = "AUTH_INVALID_CREDENTIALS", message: str = "Invalid credentials"):
         super().__init__(
             code=code,
@@ -33,7 +34,7 @@ class AuthException(AppException):
 
 class NotFoundException(AppException):
     """Resource not found exception."""
-    
+
     def __init__(self, resource: str = "Resource"):
         super().__init__(
             code=f"{resource.upper()}_NOT_FOUND",
@@ -44,7 +45,7 @@ class NotFoundException(AppException):
 
 class DuplicateException(AppException):
     """Duplicate resource exception."""
-    
+
     def __init__(self, resource: str = "Resource", field: str = ""):
         super().__init__(
             code=f"{resource.upper()}_DUPLICATE",
@@ -55,7 +56,7 @@ class DuplicateException(AppException):
 
 class ValidationException(AppException):
     """Validation exception."""
-    
+
     def __init__(self, message: str):
         super().__init__(
             code="VALIDATION_ERROR",
@@ -66,7 +67,7 @@ class ValidationException(AppException):
 
 class UnauthorizedException(AppException):
     """Unauthorized access exception."""
-    
+
     def __init__(self, message: str = "Not authorized"):
         super().__init__(
             code="UNAUTHORIZED",

@@ -1,16 +1,19 @@
 """Company model."""
-from sqlalchemy import Column, String, Boolean, DateTime, Text
-from sqlalchemy.dialects.postgresql import UUID
-from datetime import datetime
+
 import uuid
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+
 from app.db.base import Base
 
 
 class Company(Base):
     """Company model."""
-    
+
     __tablename__ = "companies"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
     address_type = Column(String(100), nullable=True)

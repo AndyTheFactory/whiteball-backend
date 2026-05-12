@@ -1,13 +1,16 @@
 """Authentication routes."""
-from fastapi import APIRouter, Depends, status
+
+from datetime import timedelta
+
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from app.api.deps import get_db, get_current_user
+
+from app.api.deps import get_current_user, get_db
+from app.core.exceptions import AuthException
+from app.core.security import create_access_token, verify_password
 from app.models.user import User
 from app.schemas.auth import LoginRequest, LoginResponse, UserResponse
-from app.core.security import verify_password, create_access_token
-from app.core.exceptions import AuthException
-from datetime import timedelta
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -21,17 +24,17 @@ async def login(
     # Find user by email
     stmt = select(User).where(User.email == credentials.email)
     user = db.execute(stmt).scalars().first()
-    
+
     if user is None:
         raise AuthException()
-    
+
     if not user.is_active:
         raise AuthException(code="AUTH_INACTIVE_USER", message="User is inactive")
-    
+
     # Verify password
     if not verify_password(credentials.password, user.password_hash):
         raise AuthException()
-    
+
     # Create access token
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
@@ -42,7 +45,7 @@ async def login(
         },
         expires_delta=access_token_expires,
     )
-    
+
     return LoginResponse(
         access_token=access_token,
         user=UserResponse(

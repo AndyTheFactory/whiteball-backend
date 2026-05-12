@@ -1,17 +1,20 @@
 """Product packaging association model."""
-from sqlalchemy import Column, Numeric, String, DateTime, ForeignKey, Text
+
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Column, DateTime, ForeignKey, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from datetime import datetime
-import uuid
+
 from app.db.base import Base
 
 
 class ProductPackagingAssociation(Base):
     """Association between products and packaging items."""
-    
+
     __tablename__ = "product_packaging_associations"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     product_id = Column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False, index=True)
     packaging_item_id = Column(UUID(as_uuid=True), ForeignKey("packaging_items.id"), nullable=False, index=True)
@@ -20,7 +23,7 @@ class ProductPackagingAssociation(Base):
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     # Relationships
     product = relationship("Product", back_populates="packaging_associations")
     packaging_item = relationship("PackagingItem", back_populates="product_associations")
