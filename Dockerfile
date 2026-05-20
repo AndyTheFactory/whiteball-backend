@@ -18,7 +18,7 @@ COPY tests/ ./tests/
 COPY .env.example ./.env
 
 # Install dependencies using uv
-RUN uv pip install --system -e .
+RUN uv sync
 
 # Expose port
 EXPOSE 8000

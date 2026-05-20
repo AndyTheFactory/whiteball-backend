@@ -1,0 +1,96 @@
+erDiagram
+    companies {
+        UUID id PK
+        string name
+        string address_type
+        string country
+        string county
+        string city
+        string postal_code
+        string street
+        string street_number
+        string building
+        string entrance
+        string floor
+        string apartment
+        text additional_address_info
+        string vat_number
+        string registration_number
+        string phone_number
+        string role
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    users {
+        UUID id PK
+        UUID company_id FK
+        string email
+        string password_hash
+        string full_name
+        string phone_number
+        string role
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    products {
+        UUID id PK
+        UUID company_id FK
+        string sku
+        string name
+        string category
+        int case_pack_quantity
+        int pallet_quantity
+        text description
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    whiteball_packaging_items {
+        UUID id PK
+        string type
+        string subtype
+        string material
+        string name
+        text description
+        numeric weight_grams
+        string source_id
+        datetime created_at
+        datetime updated_at
+    }
+
+    packaging_items {
+        UUID id PK
+        UUID company_id FK
+        string type
+        string subtype
+        string material
+        string name
+        text description
+        numeric weight_grams
+        UUID matched_with_reference_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    product_packaging_associations {
+        UUID id PK
+        UUID product_id FK
+        UUID packaging_item_id FK
+        numeric quantity_per_product_unit
+        string applies_to_unit
+        text notes
+        datetime created_at
+        datetime updated_at
+    }
+
+    companies ||--o{ users : "has"
+    companies ||--o{ products : "owns"
+    companies ||--o{ packaging_items : "owns"
+    whiteball_packaging_items ||--o{ packaging_items : "matched_with_reference"
+    products ||--o{ product_packaging_associations : "has"
+    packaging_items ||--o{ product_packaging_associations : "used_in"
