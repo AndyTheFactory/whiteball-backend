@@ -3,8 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Text, Uuid
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
@@ -15,8 +14,8 @@ class Product(Base):
 
     __tablename__ = "products"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    company_id = Column(UUID(as_uuid=True), ForeignKey("companies.id"), nullable=False, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    company_id = Column(Uuid(as_uuid=True), ForeignKey("companies.id"), nullable=False, index=True)
     sku = Column(String(100), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     category = Column(String(255), nullable=True)

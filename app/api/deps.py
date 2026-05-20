@@ -1,9 +1,10 @@
 """API dependencies."""
 
 from typing import Generator
+from uuid import UUID
 
 from fastapi import Depends
-from fastapi.security import HTTPAuthCredentials, HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -25,7 +26,7 @@ async def get_db() -> Generator[Session, None, None]:
 
 
 async def get_current_user(
-    credentials: HTTPAuthCredentials = Depends(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
     """Get current authenticated user from token."""
@@ -40,7 +41,7 @@ async def get_current_user(
         raise AuthException(message="Could not validate credentials")
 
     # Fetch user from database
-    stmt = select(User).where(User.id == user_id)
+    stmt = select(User).where(User.id == UUID(user_id))
     user = db.execute(stmt).scalars().first()
 
     if user is None:

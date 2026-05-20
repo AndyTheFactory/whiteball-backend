@@ -38,7 +38,7 @@ def test_login_invalid_password(client: TestClient, test_user: User):
     assert data["detail"]["code"] == "AUTH_INVALID_CREDENTIALS"
 
 
-def test_login_nonexistent_user(client: TestClient):
+def test_login_nonexistent_user(client: TestClient, test_user: User):
     """Test login with nonexistent user."""
     response = client.post(
         "/api/v1/auth/login",
@@ -69,4 +69,4 @@ def test_protected_endpoint_requires_token(client: TestClient):
     """Test that protected endpoints require authentication."""
     response = client.get("/api/v1/products")
 
-    assert response.status_code == 403
+    assert response.status_code == 401
