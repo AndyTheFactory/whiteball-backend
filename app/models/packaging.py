@@ -2,11 +2,17 @@
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, ForeignKey, Numeric, String, Text, Uuid
-from sqlalchemy.orm import relationship
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text, Uuid
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.company import Company
+    from app.models.product_packaging_association import ProductPackagingAssociation
 
 
 class PackagingItem(Base):
@@ -14,22 +20,30 @@ class PackagingItem(Base):
 
     __tablename__ = "packaging_items"
 
-    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    company_id = Column(Uuid(as_uuid=True), ForeignKey("companies.id"), nullable=False, index=True)
-    type = Column(String(50), nullable=False)  # primary, secondary, tertiary
-    subtype = Column(String(100), nullable=True)  # commercial, municipal, unknown
-    material = Column(String(100), nullable=False)  # plastic, pet, glass, etc.
-    name = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
-    weight_grams = Column(Numeric(precision=10, scale=2), nullable=False)
-    matched_with_reference_id = Column(Uuid(as_uuid=True), ForeignKey("whiteball_packaging_items.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("companies.id"), nullable=False, index=True
+    )
+    type: Mapped[str] = mapped_column(String(50), nullable=False)  # primary, secondary, tertiary
+    subtype: Mapped[str | None] = mapped_column(String(100), nullable=True)  # commercial, municipal, unknown
+    material: Mapped[str] = mapped_column(String(100), nullable=False)  # plastic, pet, glass, etc.
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    weight_grams: Mapped[Decimal] = mapped_column(Numeric(precision=10, scale=2), nullable=False)
+    matched_with_reference_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("whiteball_packaging_items.id"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
 
     # Relationships
-    company = relationship("Company")
-    product_associations = relationship("ProductPackagingAssociation", back_populates="packaging_item")
-    reference_item = relationship("WhiteballPackagingItem")
+    company: Mapped["Company"] = relationship("Company")
+    product_associations: Mapped[list["ProductPackagingAssociation"]] = relationship(
+        "ProductPackagingAssociation", back_populates="packaging_item"
+    )
+    reference_item: Mapped["WhiteballPackagingItem | None"] = relationship("WhiteballPackagingItem")
 
 
 class WhiteballPackagingItem(Base):
@@ -37,13 +51,15 @@ class WhiteballPackagingItem(Base):
 
     __tablename__ = "whiteball_packaging_items"
 
-    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    type = Column(String(50), nullable=False)
-    subtype = Column(String(100), nullable=True)
-    material = Column(String(100), nullable=False)
-    name = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
-    weight_grams = Column(Numeric(precision=10, scale=2), nullable=True)
-    source_id = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    subtype: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    material: Mapped[str] = mapped_column(String(100), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    weight_grams: Mapped[Decimal | None] = mapped_column(Numeric(precision=10, scale=2), nullable=True)
+    source_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )

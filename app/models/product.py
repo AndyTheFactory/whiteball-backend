@@ -2,12 +2,16 @@
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.company import Company
+    from app.models.product_packaging_association import ProductPackagingAssociation
 
 
 class Product(Base):
@@ -32,8 +36,10 @@ class Product(Base):
     )
 
     # Relationships
-    company: Mapped[Any] = relationship("Company")
-    packaging_associations: Mapped[list[Any]] = relationship("ProductPackagingAssociation", back_populates="product")
+    company: Mapped["Company"] = relationship("Company")
+    packaging_associations: Mapped[list["ProductPackagingAssociation"]] = relationship(
+        "ProductPackagingAssociation", back_populates="product"
+    )
 
     # Unique constraint on company_id and sku
     __table_args__ = (Index("ix_products_company_sku", "company_id", "sku", unique=True),)
