@@ -52,8 +52,8 @@ async def list_products(
     is_active: bool | None = Query(None),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    sort_by: str = Query("name", regex="^(name|sku|created_at)$"),
-    sort_order: str = Query("asc", regex="^(asc|desc)$"),
+    sort_by: str = Query("name", pattern="^(name|sku|created_at)$"),
+    sort_order: str = Query("asc", pattern="^(asc|desc)$"),
 ) -> PaginatedResponse:
     """List products for the current company."""
     # Build query
