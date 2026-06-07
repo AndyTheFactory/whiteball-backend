@@ -1,5 +1,6 @@
 """Product routes."""
 
+from typing import cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
@@ -14,6 +15,32 @@ from app.schemas.common import PaginatedResponse
 from app.schemas.product import ProductCreate, ProductDetailResponse, ProductResponse, ProductUpdate
 
 router = APIRouter(prefix="/products", tags=["products"])
+
+
+@router.get("/categories", response_model=list[str])
+async def list_categories(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    prefix: str | None = Query(None),
+    limit: int = Query(20, ge=1, le=100),
+) -> list[str]:
+    """List distinct product categories for the current company, optionally filtered by prefix."""
+    stmt = (
+        select(Product.category)
+        .where(Product.company_id == current_user.company_id)
+        .where(Product.category.isnot(None))
+        .where(Product.category != "")
+        .distinct()
+    )
+
+    if prefix:
+        stmt = stmt.where(Product.category.ilike(f"{prefix}%"))
+
+    stmt = stmt.order_by(Product.category).limit(limit)
+
+    rows = cast(list[str], list(db.execute(stmt).scalars().all()))
+
+    return rows
 
 
 @router.get("", response_model=PaginatedResponse)
@@ -65,7 +92,12 @@ async def list_products(
     products = db.execute(stmt).scalars().all()
 
     items = [
-        ProductResponse(**{**product.__dict__, "packaging_count": len(product.packaging_associations)})
+        ProductResponse(
+            **{
+                **product.__dict__,
+                "packaging_count": len(product.packaging_associations),
+            }
+        )
         for product in products
     ]
 
@@ -127,7 +159,11 @@ async def get_product(
     ]
 
     return ProductDetailResponse(
-        **{**product.__dict__, "packaging_count": len(product.packaging_associations), "packaging": packaging}
+        **{
+            **product.__dict__,
+            "packaging_count": len(product.packaging_associations),
+            "packaging": packaging,
+        }
     )
 
 

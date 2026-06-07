@@ -48,7 +48,7 @@ class ProductPackagingInput(BaseModel):
 
     packaging_item_id: UUID | None = None
     packaging_item: PackagingItemCreate | None = None
-    quantity_per_product_unit: Decimal = Field(default=1, ge=0)
+    quantity_per_product_unit: Decimal = Field(default=Decimal(1), ge=0)
     applies_to_unit: str = Field(default="unit", max_length=50)
     notes: str | None = None
 

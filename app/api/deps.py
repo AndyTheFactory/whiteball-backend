@@ -1,6 +1,6 @@
 """API dependencies."""
 
-from typing import Generator
+from collections.abc import AsyncGenerator
 from uuid import UUID
 
 from fastapi import Depends
@@ -16,7 +16,7 @@ from app.models.user import User
 security = HTTPBearer()
 
 
-async def get_db() -> Generator[Session, None, None]:
+async def get_db() -> AsyncGenerator[Session, None]:
     """Get database session dependency."""
     db = get_db_session()
     try:

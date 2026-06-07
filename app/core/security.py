@@ -1,7 +1,6 @@
 """Security utilities for JWT and password hashing."""
 
 from datetime import datetime, timedelta
-from typing import Optional
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -13,17 +12,17 @@ pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def get_password_hash(password: str) -> str:
     """Hash a password."""
-    return pwd_context.hash(password)
+    return str(pwd_context.hash(password))
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bool(pwd_context.verify(plain_password, hashed_password))
 
 
 def create_access_token(
     data: dict,
-    expires_delta: Optional[timedelta] = None,
+    expires_delta: timedelta | None = None,
 ) -> str:
     """Create a JWT access token."""
     settings = get_settings()
@@ -40,14 +39,14 @@ def create_access_token(
         settings.secret_key,
         algorithm=settings.algorithm,
     )
-    return encoded_jwt
+    return str(encoded_jwt)
 
 
-def decode_token(token: str) -> Optional[dict]:
+def decode_token(token: str) -> dict | None:
     """Decode and verify a JWT token."""
     settings = get_settings()
     try:
-        payload = jwt.decode(
+        payload: dict = jwt.decode(
             token,
             settings.secret_key,
             algorithms=[settings.algorithm],
