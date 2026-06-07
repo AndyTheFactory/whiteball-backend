@@ -151,7 +151,7 @@ Then create a pull request on GitHub with:
 
 ### Python
 
-- **Line length**: 88 characters (Black default)
+- **Line length**: 120 characters
 - **Imports**: Use absolute imports, organized by: stdlib, third-party, local
 - **Naming**: snake_case for variables/functions, PascalCase for classes
 - **Type hints**: Use type hints for function signatures (though not strictly enforced)
@@ -161,8 +161,10 @@ Example:
 
 ```python
 """Module for managing products."""
+
 from typing import List
 from uuid import UUID
+
 
 def get_products(
     company_id: UUID,
