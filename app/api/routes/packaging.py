@@ -1,5 +1,6 @@
 """Packaging routes."""
 
+from typing import cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
@@ -116,17 +117,17 @@ async def delete_packaging_item(
     current_user: User = Depends(get_current_user),
 ) -> None:
     """Delete a packaging item and all its associations."""
-    stmt = select(PackagingItem).where(
+    item_stmt = select(PackagingItem).where(
         (PackagingItem.id == item_id) & (PackagingItem.company_id == current_user.company_id)
     )
-    item = db.execute(stmt).scalars().first()
+    item = db.execute(item_stmt).scalars().first()
 
     if not item:
         raise NotFoundException("Packaging item")
 
     # Delete all associations
-    stmt = select(ProductPackagingAssociation).where(ProductPackagingAssociation.packaging_item_id == item_id)
-    associations = db.execute(stmt).scalars().all()
+    assoc_stmt = select(ProductPackagingAssociation).where(ProductPackagingAssociation.packaging_item_id == item_id)
+    associations = db.execute(assoc_stmt).scalars().all()
     for assoc in associations:
         db.delete(assoc)
 
@@ -145,8 +146,8 @@ async def associate_packaging_with_product(
 ) -> PackagingAssociationResponse:
     """Associate packaging with a product."""
     # Verify product exists and belongs to user's company
-    stmt = select(Product).where((Product.id == product_id) & (Product.company_id == current_user.company_id))
-    product = db.execute(stmt).scalars().first()
+    stmt_product = select(Product).where((Product.id == product_id) & (Product.company_id == current_user.company_id))
+    product = db.execute(stmt_product).scalars().first()
 
     if not product:
         raise NotFoundException("Product")
@@ -167,10 +168,10 @@ async def associate_packaging_with_product(
         raise ValidationException("Must specify either packaging_item_id or packaging_item")
 
     # Verify packaging item exists and belongs to user's company
-    stmt = select(PackagingItem).where(
+    stmt_packaging_item = select(PackagingItem).where(
         (PackagingItem.id == packaging_item_id) & (PackagingItem.company_id == current_user.company_id)
     )
-    packaging_item = db.execute(stmt).scalars().first()
+    packaging_item = db.execute(stmt_packaging_item).scalars().first()
 
     if not packaging_item:
         raise NotFoundException("Packaging item")
@@ -219,8 +220,8 @@ async def update_product_packaging_association(
         raise NotFoundException("Product")
 
     # Verify association exists
-    stmt = select(ProductPackagingAssociation).where(ProductPackagingAssociation.id == association_id)
-    association = db.execute(stmt).scalars().first()
+    stmt_association = select(ProductPackagingAssociation).where(ProductPackagingAssociation.id == association_id)
+    association = cast(ProductPackagingAssociation, db.execute(stmt_association).scalars().first())
 
     if not association or association.product_id != product_id:
         raise NotFoundException("Product packaging association")
@@ -275,8 +276,8 @@ async def remove_packaging_from_product(
         raise NotFoundException("Product")
 
     # Verify and delete association
-    stmt = select(ProductPackagingAssociation).where(ProductPackagingAssociation.id == association_id)
-    association = db.execute(stmt).scalars().first()
+    stmt_association = select(ProductPackagingAssociation).where(ProductPackagingAssociation.id == association_id)
+    association = cast(ProductPackagingAssociation, db.execute(stmt_association).scalars().first())
 
     if not association or association.product_id != product_id:
         raise NotFoundException("Product packaging association")
