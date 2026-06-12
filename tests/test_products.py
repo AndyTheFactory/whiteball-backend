@@ -15,6 +15,8 @@ def test_create_product(client: TestClient, auth_headers: dict, test_user: User)
             "category": "Electronics",
             "case_pack_quantity": 12,
             "pallet_quantity": 720,
+            "net_weight": 10.5,
+            "manufacturer": "Acme",
             "description": "Test product description",
         },
         headers=auth_headers,
@@ -25,6 +27,9 @@ def test_create_product(client: TestClient, auth_headers: dict, test_user: User)
     assert data["sku"] == "SKU-001"
     assert data["name"] == "Test Product"
     assert data["company_id"] == str(test_user.company_id)
+    assert float(data["net_weight"]) == 10.5
+    assert data["manufacturer"] == "Acme"
+    assert data["classification_count"] == 0
 
 
 def test_create_product_duplicate_sku_same_company(client: TestClient, auth_headers: dict):
@@ -76,6 +81,7 @@ def test_list_products(client: TestClient, auth_headers: dict):
     data = response.json()
     assert data["total"] == 3
     assert len(data["items"]) == 3
+    assert all(item["classification_count"] == 0 for item in data["items"])
 
 
 def test_search_products_by_sku(client: TestClient, auth_headers: dict):
@@ -143,7 +149,8 @@ def test_get_product_detail(client: TestClient, auth_headers: dict):
     assert response.status_code == 200
     data = response.json()
     assert data["sku"] == "DETAIL-001"
-    assert "packaging" in data
+    assert data["classifications"] == []
+    assert data["packaging"] == []
 
 
 def test_update_product(client: TestClient, auth_headers: dict):

@@ -1,38 +1,43 @@
-"""Packaging tests."""
+"""Packaging-related tests."""
 
 from fastapi.testclient import TestClient
 
+from app.models.user import User
 
-def test_create_packaging_item(client: TestClient, auth_headers: dict):
-    """Test creating a packaging item."""
+
+def test_create_product_element(client: TestClient, auth_headers: dict, seed_dictionary_data: None):
+    """Test creating a product element."""
     response = client.post(
-        "/api/v1/packaging-items",
+        "/api/v1/product-elements",
         json={
-            "type": "primary",
-            "subtype": "commercial",
-            "material": "plastic",
+            "classification_code": "ambalaje",
+            "type_code": "primary",
+            "material_code": "other_plastics",
             "name": "Plastic Bottle",
             "description": "500ml PET bottle",
             "weight_grams": 25.5,
+            "attributes": {"color": "clear"},
         },
         headers=auth_headers,
     )
 
     assert response.status_code == 201
     data = response.json()
-    assert data["type"] == "primary"
-    assert data["material"] == "plastic"
+    assert data["classification_code"] == "ambalaje"
+    assert data["type_code"] == "primary"
+    assert data["material_code"] == "other_plastics"
     assert data["name"] == "Plastic Bottle"
+    assert data["attributes"]["color"] == "clear"
 
 
-def test_update_packaging_item(client: TestClient, auth_headers: dict):
-    """Test updating a packaging item."""
-    # Create packaging item
+def test_update_product_element(client: TestClient, auth_headers: dict, seed_dictionary_data: None):
+    """Test updating a product element."""
     create_response = client.post(
-        "/api/v1/packaging-items",
+        "/api/v1/product-elements",
         json={
-            "type": "primary",
-            "material": "plastic",
+            "classification_code": "ambalaje",
+            "type_code": "primary",
+            "material_code": "other_plastics",
             "name": "Original Name",
             "weight_grams": 25.5,
         },
@@ -40,12 +45,12 @@ def test_update_packaging_item(client: TestClient, auth_headers: dict):
     )
     item_id = create_response.json()["id"]
 
-    # Update item
     response = client.patch(
-        f"/api/v1/packaging-items/{item_id}",
+        f"/api/v1/product-elements/{item_id}",
         json={
             "name": "Updated Name",
             "weight_grams": 30.0,
+            "attributes": {"updated": True},
         },
         headers=auth_headers,
     )
@@ -54,151 +59,107 @@ def test_update_packaging_item(client: TestClient, auth_headers: dict):
     data = response.json()
     assert data["name"] == "Updated Name"
     assert float(data["weight_grams"]) == 30.0
+    assert data["attributes"]["updated"] is True
 
 
-def test_list_packaging_items(client: TestClient, auth_headers: dict):
-    """Test listing packaging items."""
-    # Create items
+def test_list_product_elements(client: TestClient, auth_headers: dict, seed_dictionary_data: None):
+    """Test listing product elements."""
     for i in range(3):
         client.post(
-            "/api/v1/packaging-items",
+            "/api/v1/product-elements",
             json={
-                "type": "primary",
-                "material": "plastic",
-                "name": f"Item {i}",
+                "classification_code": "ambalaje",
+                "type_code": "primary",
+                "material_code": "other_plastics",
+                "name": f"Element {i}",
                 "weight_grams": 25 + i,
             },
             headers=auth_headers,
         )
 
-    response = client.get(
-        "/api/v1/packaging-items",
-        headers=auth_headers,
-    )
+    response = client.get("/api/v1/product-elements", headers=auth_headers)
 
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 3
+    assert len(data["items"]) == 3
 
 
-def test_associate_packaging_with_product(client: TestClient, auth_headers: dict):
-    """Test associating packaging with a product."""
-    # Create product
+def test_list_whiteball_reference_items(client: TestClient, auth_headers: dict, reference_packaging_item):
+    """Test listing Whiteball reference packaging items."""
+    response = client.get("/api/v1/whiteball-packaging-items", headers=auth_headers)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total"] == 1
+    assert data["items"][0]["source_id"] == reference_packaging_item.source_id
+
+
+def test_create_update_delete_product_classification(
+    client: TestClient, auth_headers: dict, seed_dictionary_data: None, test_user: User
+):
+    """Test creating, updating, and deleting a product classification."""
     product_response = client.post(
         "/api/v1/products",
         json={
             "sku": "PROD-001",
             "name": "Test Product",
+            "classification_count": 0,
         },
         headers=auth_headers,
     )
     product_id = product_response.json()["id"]
 
-    # Associate packaging
-    response = client.post(
-        f"/api/v1/products/{product_id}/packaging",
+    create_response = client.post(
+        f"/api/v1/products/{product_id}/classifications",
+        json={"classification_code": "ambalaje"},
+        headers=auth_headers,
+    )
+    assert create_response.status_code == 201
+    association_id = create_response.json()["association_id"]
+    assert create_response.json()["classification_code"] == "ambalaje"
+
+    list_response = client.get(f"/api/v1/products/{product_id}/classifications", headers=auth_headers)
+    assert list_response.status_code == 200
+    assert len(list_response.json()) == 1
+
+    update_response = client.patch(
+        f"/api/v1/products/{product_id}/classifications/{association_id}",
+        json={"classification_code": "scp"},
+        headers=auth_headers,
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["classification_code"] == "scp"
+
+    delete_response = client.delete(
+        f"/api/v1/products/{product_id}/classifications/{association_id}",
+        headers=auth_headers,
+    )
+    assert delete_response.status_code == 204
+
+    final_list_response = client.get(f"/api/v1/products/{product_id}/classifications", headers=auth_headers)
+    assert final_list_response.status_code == 200
+    assert final_list_response.json() == []
+
+
+def test_delete_product_element(client: TestClient, auth_headers: dict, seed_dictionary_data: None):
+    """Test removing a product element."""
+    create_response = client.post(
+        "/api/v1/product-elements",
         json={
-            "packaging_item": {
-                "type": "primary",
-                "material": "plastic",
-                "name": "Plastic Bottle",
-                "weight_grams": 25.5,
-            },
-            "quantity_per_product_unit": 1,
+            "classification_code": "ambalaje",
+            "type_code": "primary",
+            "material_code": "other_plastics",
+            "name": "Delete Me",
+            "weight_grams": 25.5,
         },
         headers=auth_headers,
     )
+    item_id = create_response.json()["id"]
 
-    assert response.status_code == 201
-    data = response.json()
-    assert data["type"] == "primary"
-    assert data["quantity_per_product_unit"] == 1
-
-
-def test_update_product_packaging_association(client: TestClient, auth_headers: dict):
-    """Test updating a product packaging association."""
-    # Create product
-    product_response = client.post(
-        "/api/v1/products",
-        json={
-            "sku": "PROD-002",
-            "name": "Test Product",
-        },
-        headers=auth_headers,
-    )
-    product_id = product_response.json()["id"]
-
-    # Associate packaging
-    assoc_response = client.post(
-        f"/api/v1/products/{product_id}/packaging",
-        json={
-            "packaging_item": {
-                "type": "primary",
-                "material": "plastic",
-                "name": "Plastic Bottle",
-                "weight_grams": 25.5,
-            },
-            "quantity_per_product_unit": 1,
-        },
-        headers=auth_headers,
-    )
-    association_id = assoc_response.json()["association_id"]
-
-    # Update association
-    response = client.patch(
-        f"/api/v1/products/{product_id}/packaging/{association_id}",
-        json={
-            "quantity_per_product_unit": 2,
-            "notes": "Updated note",
-        },
-        headers=auth_headers,
-    )
-
-    assert response.status_code == 200
-    data = response.json()
-    assert data["quantity_per_product_unit"] == 2
-    assert data["notes"] == "Updated note"
-
-
-def test_remove_packaging_from_product(client: TestClient, auth_headers: dict):
-    """Test removing packaging from product."""
-    # Create product
-    product_response = client.post(
-        "/api/v1/products",
-        json={
-            "sku": "PROD-003",
-            "name": "Test Product",
-        },
-        headers=auth_headers,
-    )
-    product_id = product_response.json()["id"]
-
-    # Associate packaging
-    assoc_response = client.post(
-        f"/api/v1/products/{product_id}/packaging",
-        json={
-            "packaging_item": {
-                "type": "primary",
-                "material": "plastic",
-                "name": "Plastic Bottle",
-                "weight_grams": 25.5,
-            },
-        },
-        headers=auth_headers,
-    )
-    association_id = assoc_response.json()["association_id"]
-
-    # Remove association
-    response = client.delete(
-        f"/api/v1/products/{product_id}/packaging/{association_id}",
-        headers=auth_headers,
-    )
-
+    response = client.delete(f"/api/v1/product-elements/{item_id}", headers=auth_headers)
     assert response.status_code == 204
 
-    # Verify product detail doesn't include the packaging
-    detail_response = client.get(
-        f"/api/v1/products/{product_id}",
-        headers=auth_headers,
-    )
-    assert len(detail_response.json()["packaging"]) == 0
+    list_response = client.get("/api/v1/product-elements", headers=auth_headers)
+    assert list_response.status_code == 200
+    assert list_response.json()["total"] == 0

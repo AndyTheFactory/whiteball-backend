@@ -1,5 +1,6 @@
 """Product schemas."""
 
+from decimal import Decimal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -15,6 +16,8 @@ class ProductCreate(BaseModel):
     category: str | None = Field(None, max_length=255)
     case_pack_quantity: int | None = Field(None, ge=1)
     pallet_quantity: int | None = Field(None, ge=1)
+    net_weight: Decimal | None = Field(None, ge=0)
+    manufacturer: str | None = Field(None, max_length=255)
     description: str | None = None
 
 
@@ -26,6 +29,8 @@ class ProductUpdate(BaseModel):
     category: str | None = Field(None, max_length=255)
     case_pack_quantity: int | None = Field(None, ge=1)
     pallet_quantity: int | None = Field(None, ge=1)
+    net_weight: Decimal | None = Field(None, ge=0)
+    manufacturer: str | None = Field(None, max_length=255)
     description: str | None = None
     is_active: bool | None = None
 
@@ -38,18 +43,20 @@ class ProductResponse(BaseSchema):
     category: str | None = None
     case_pack_quantity: int | None = None
     pallet_quantity: int | None = None
+    net_weight: Decimal | None = None
+    manufacturer: str | None = None
     description: str | None = None
     is_active: bool
     company_id: UUID
     packaging_count: int = 0
+    classification_count: int = 0
 
 
 class ProductDetailResponse(ProductResponse):
     """Product detail response with packaging."""
 
-    packaging: list["PackagingAssociationResponse"] = []
+    packaging: list[str] = []
+    classifications: list[str] = []
 
-
-from app.schemas.packaging import PackagingAssociationResponse
 
 ProductDetailResponse.model_rebuild()

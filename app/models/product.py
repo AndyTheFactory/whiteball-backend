@@ -2,16 +2,17 @@
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, Uuid
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.company import Company
-    from app.models.product_packaging_association import ProductPackagingAssociation
+    from app.models.product_packaging_association import ProductClassification
 
 
 class Product(Base):
@@ -28,6 +29,8 @@ class Product(Base):
     category: Mapped[str | None] = mapped_column(String(255), nullable=True)
     case_pack_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
     pallet_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    net_weight: Mapped[Decimal | None] = mapped_column(Numeric(precision=10, scale=2), nullable=True)
+    manufacturer: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
@@ -37,8 +40,8 @@ class Product(Base):
 
     # Relationships
     company: Mapped["Company"] = relationship("Company")
-    packaging_associations: Mapped[list["ProductPackagingAssociation"]] = relationship(
-        "ProductPackagingAssociation", back_populates="product"
+    classifications: Mapped[list["ProductClassification"]] = relationship(
+        "ProductClassification", back_populates="product"
     )
 
     # Unique constraint on company_id and sku

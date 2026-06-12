@@ -1,4 +1,4 @@
-"""Packaging schemas."""
+"""Packaging and classification schemas."""
 
 from decimal import Decimal
 from uuid import UUID
@@ -8,73 +8,76 @@ from pydantic import BaseModel, Field
 from app.schemas.common import BaseSchema
 
 
-class PackagingItemCreate(BaseModel):
-    """Packaging item creation schema."""
+class ProductElementCreate(BaseModel):
+    """Product element creation schema."""
 
-    type: str = Field(..., min_length=1, max_length=50)
-    subtype: str | None = Field(None, max_length=100)
-    material: str = Field(..., min_length=1, max_length=100)
+    classification_code: str = Field(..., min_length=1, max_length=50)
+    type_code: str | None = Field(None, max_length=50)
+    material_code: str = Field(..., min_length=1, max_length=50)
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = None
     weight_grams: Decimal = Field(..., ge=0)
+    attributes: dict[str, object] = Field(default_factory=dict)
 
 
-class PackagingItemUpdate(BaseModel):
-    """Packaging item update schema."""
+class ProductElementUpdate(BaseModel):
+    """Product element update schema."""
 
-    type: str | None = Field(None, min_length=1, max_length=50)
-    subtype: str | None = Field(None, max_length=100)
-    material: str | None = Field(None, min_length=1, max_length=100)
+    classification_code: str | None = Field(None, min_length=1, max_length=50)
+    type_code: str | None = Field(None, max_length=50)
+    material_code: str | None = Field(None, min_length=1, max_length=50)
     name: str | None = Field(None, min_length=1, max_length=255)
     description: str | None = None
     weight_grams: Decimal | None = Field(None, ge=0)
+    attributes: dict[str, object] | None = None
 
 
-class PackagingItemResponse(BaseSchema):
-    """Packaging item response schema."""
+class ProductElementResponse(BaseSchema):
+    """Product element response schema."""
+
+    company_id: UUID
+    classification_code: str
+    type_code: str | None = None
+    material_code: str
+    name: str
+    description: str | None = None
+    weight_grams: Decimal
+    attributes: dict[str, object] = Field(default_factory=dict)
+
+
+class WhiteballPackagingItemResponse(BaseSchema):
+    """Whiteball packaging reference response schema."""
 
     type: str
     subtype: str | None = None
     material: str
     name: str
     description: str | None = None
-    weight_grams: Decimal
-    company_id: UUID
-    matched_with_reference_id: UUID | None = None
+    weight_grams: Decimal | None = None
+    source_id: str | None = None
 
 
-class ProductPackagingInput(BaseModel):
-    """Product packaging input for association creation."""
+class ProductClassificationCreate(BaseModel):
+    """Create a product classification."""
 
-    packaging_item_id: UUID | None = None
-    packaging_item: PackagingItemCreate | None = None
-    quantity_per_product_unit: Decimal = Field(default=Decimal(1), ge=0)
-    applies_to_unit: str = Field(default="unit", max_length=50)
-    notes: str | None = None
+    classification_code: str = Field(..., min_length=1, max_length=50)
 
 
-class PackagingAssociationResponse(BaseModel):
-    """Product packaging association response."""
+class ProductClassificationResponse(BaseModel):
+    """Product classification response."""
 
     association_id: UUID
-    packaging_item_id: UUID
-    type: str
-    subtype: str | None = None
-    material: str
-    name: str
-    weight_grams: Decimal
-    quantity_per_product_unit: Decimal
-    applies_to_unit: str = "unit"
-    notes: str | None = None
+    product_id: UUID
+    classification_code: str
+    name_ro: str | None = None
+    name_en: str | None = None
+    is_active: bool | None = None
 
     class Config:
         from_attributes = True
 
 
-class PackagingAssociationUpdate(BaseModel):
-    """Product packaging association update."""
+class ProductClassificationUpdate(BaseModel):
+    """Product classification update schema."""
 
-    quantity_per_product_unit: Decimal | None = Field(None, ge=0)
-    applies_to_unit: str | None = Field(None, max_length=50)
-    notes: str | None = None
-    packaging_item: PackagingItemUpdate | None = None
+    classification_code: str | None = Field(None, min_length=1, max_length=50)

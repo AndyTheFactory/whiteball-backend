@@ -13,6 +13,7 @@ def import_all_models() -> None:
     """Import all model modules so Base metadata is populated."""
     for module in (
         "app.models.company",
+        "app.models.dictionary",
         "app.models.user",
         "app.models.product",
         "app.models.packaging",
