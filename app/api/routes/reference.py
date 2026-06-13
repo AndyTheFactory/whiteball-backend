@@ -1,18 +1,18 @@
-from fastapi import Depends, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
-from app.api.routes.packaging import APIRouter
 from app.models.packaging import WhiteballPackagingItem
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
 from app.schemas.packaging import WhiteballPackagingItemResponse
 
-router = APIRouter(prefix="/reference", tags=["reference database"])
+router = APIRouter(tags=["reference database"])
 
 
 @router.get("/whiteball-packaging-items", response_model=PaginatedResponse)
+@router.get("/reference/whiteball-packaging-items", response_model=PaginatedResponse)
 async def list_whiteball_packaging_items(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),

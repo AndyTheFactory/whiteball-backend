@@ -35,7 +35,8 @@ class ProductElementUpdate(BaseModel):
 class ProductElementResponse(BaseSchema):
     """Product element response schema."""
 
-    company_id: UUID
+    company_id: UUID | None = None
+    product_id: UUID | None = None
     classification_code: str
     type_code: str | None = None
     material_code: str

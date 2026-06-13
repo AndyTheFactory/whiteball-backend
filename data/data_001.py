@@ -320,7 +320,6 @@ seed_data = {
     "product_elements": [
         {
             "id": "11111111-1117-4111-8111-111111111111",
-            "company_id": "11111111-1113-4111-8111-111111111111",
             "product_id": "11111111-1115-4111-8111-111111111111",
             "classification_code": "ambalaje",
             "type_code": "primary",

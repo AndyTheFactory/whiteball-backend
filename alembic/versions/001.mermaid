@@ -1,4 +1,20 @@
 erDiagram
+    dictionary_types {
+        UUID id PK
+        string code UK
+        string name
+    }
+
+    dictionary_values {
+        UUID id PK
+        string dictionary_type_code FK
+        string code UK
+        string name_ro
+        string name_en
+        boolean is_active
+        int sort_order
+    }
+
     companies {
         UUID id PK
         string name
@@ -44,8 +60,30 @@ erDiagram
         string category
         int case_pack_quantity
         int pallet_quantity
+        decimal net_weight
+        string manufacturer
         text description
         boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    product_classifications {
+        UUID id PK
+        UUID product_id FK
+        string classification_code FK
+    }
+
+    product_elements {
+        UUID id PK
+        UUID product_id FK
+        string classification_code FK
+        string type_code FK
+        string material_code FK
+        string name
+        text description
+        decimal weight_grams
+        jsonb attributes
         datetime created_at
         datetime updated_at
     }
@@ -57,40 +95,16 @@ erDiagram
         string material
         string name
         text description
-        numeric weight_grams
+        decimal weight_grams
         string source_id
         datetime created_at
         datetime updated_at
     }
 
-    packaging_items {
-        UUID id PK
-        UUID company_id FK
-        string type
-        string subtype
-        string material
-        string name
-        text description
-        numeric weight_grams
-        UUID matched_with_reference_id FK
-        datetime created_at
-        datetime updated_at
-    }
-
-    product_packaging_associations {
-        UUID id PK
-        UUID product_id FK
-        UUID packaging_item_id FK
-        numeric quantity_per_product_unit
-        string applies_to_unit
-        text notes
-        datetime created_at
-        datetime updated_at
-    }
-
+    dictionary_types ||--o{ dictionary_values : "has"
     companies ||--o{ users : "has"
     companies ||--o{ products : "owns"
-    companies ||--o{ packaging_items : "owns"
-    whiteball_packaging_items ||--o{ packaging_items : "matched_with_reference"
-    products ||--o{ product_packaging_associations : "has"
-    packaging_items ||--o{ product_packaging_associations : "used_in"
+    products ||--o{ product_classifications : "has"
+    dictionary_values ||--o{ product_classifications : "classifies"
+    products ||--o{ product_elements : "contains"
+    dictionary_values ||--o{ product_elements : "references"

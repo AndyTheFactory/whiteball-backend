@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.api.routes import auth, company, dictionaries, products, reference, users
+from app.api.routes import auth, company, dictionaries, packaging, product_elements, products, reference, users
 
 # Create main router
 api_router = APIRouter(prefix="/api/v1")
@@ -12,6 +12,8 @@ api_router.include_router(auth.router)
 api_router.include_router(company.router)
 api_router.include_router(users.router)
 api_router.include_router(products.router)
+api_router.include_router(packaging.router)
+api_router.include_router(product_elements.router)
 api_router.include_router(reference.router)
 api_router.include_router(dictionaries.router)
 

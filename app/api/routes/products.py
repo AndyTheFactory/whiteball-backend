@@ -318,6 +318,27 @@ async def update_product_classification(
     return _classification_response(db, association)
 
 
+@router.delete("/{product_id}/classifications/all", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_all_product_classifications(
+    product_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    """Remove all classifications from a product."""
+    stmt = select(Product).where((Product.id == product_id) & (Product.company_id == current_user.company_id))
+    product = db.execute(stmt).scalars().first()
+
+    if not product:
+        raise NotFoundException("Product")
+
+    associations = (
+        db.execute(select(ProductClassification).where(ProductClassification.product_id == product_id)).scalars().all()
+    )
+    for association in associations:
+        db.delete(association)
+    db.commit()
+
+
 @router.delete("/{product_id}/classifications/{association_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_product_classification(
     product_id: UUID,

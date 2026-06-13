@@ -12,6 +12,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.company import Company
+    from app.models.product import Product
 
 
 class PackagingItem(Base):
@@ -22,6 +23,9 @@ class PackagingItem(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     company_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("companies.id"), nullable=False, index=True
+    )
+    product_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("products.id"), nullable=True, index=True
     )
     classification_code: Mapped[str] = mapped_column(String(50), ForeignKey("dictionary_values.code"), nullable=False)
     type_code: Mapped[str | None] = mapped_column(String(50), ForeignKey("dictionary_values.code"), nullable=True)
@@ -37,6 +41,7 @@ class PackagingItem(Base):
 
     # Relationships
     company: Mapped["Company"] = relationship("Company")
+    product: Mapped["Product"] = relationship("Product")
 
 
 class WhiteballPackagingItem(Base):

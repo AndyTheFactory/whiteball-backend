@@ -180,24 +180,56 @@ def upgrade() -> None:
     op.create_table(
         "product_elements",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("company_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("classification_code", sa.String(50), nullable=False),
-        sa.Column("type_code", sa.String(50), nullable=True),
-        sa.Column("material_code", sa.String(50), nullable=False),
-        sa.Column("name", sa.String(255), nullable=False),
-        sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("weight_grams", sa.Numeric(precision=10, scale=2), nullable=False),
+        sa.Column("product_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column(
+            "classification_code",
+            sa.String(50),
+            nullable=False,
+            comment="Code referencing the classification of the product element eg 'packaging', 'battery', 'sgr'",
+        ),
+        sa.Column(
+            "type_code",
+            sa.String(50),
+            nullable=True,
+            comment="Code referencing the type of material eg 'primary', 'secondary', 'tertiary'",
+        ),
+        sa.Column(
+            "material_code",
+            sa.String(50),
+            nullable=True,
+            comment="Code referencing the material type for the element eg 'plastic', 'paper', 'metal'",
+        ),
+        sa.Column(
+            "name",
+            sa.String(255),
+            nullable=True,
+            comment="Human-readable name of the product element eg 'Plastic Bottle', 'Cardboard Box'",
+        ),
+        sa.Column(
+            "description",
+            sa.Text(),
+            nullable=True,
+            comment="Detailed description of the product element, additional information, etc.",
+        ),
+        sa.Column(
+            "weight_grams",
+            sa.Numeric(precision=10, scale=2),
+            nullable=True,
+            comment="Weight of the product element in grams. Useful for oils and products that are reported in weight",
+        ),
         sa.Column(
             "attributes",
             postgresql.JSONB(astext_type=sa.Text()),
-            nullable=False,
+            nullable=True,
             server_default=sa.text("'{}'::jsonb"),
+            comment="JSONB column to store additional attributes for the "
+            "product element, such as dimensions, color, etc. For classes that have specific attributes.",
         ),
         sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
         sa.ForeignKeyConstraint(
-            ["company_id"],
-            ["companies.id"],
+            ["product_id"],
+            ["products.id"],
         ),
         sa.ForeignKeyConstraint(
             ["classification_code"],
@@ -213,7 +245,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_product_elements_company_id", "product_elements", ["company_id"])
+    op.create_index("ix_product_elements_product_id", "product_elements", ["product_id"])
 
     # Create whiteball_packaging_items table
     op.create_table(
