@@ -101,13 +101,12 @@ def _attrs_from_model(elem: ProductElements) -> dict:
 _PACKAGING = "packaging"
 
 
-def _packaging_from_input(inp: PackagingElementInput, product_id: UUID, company_id: UUID) -> ProductElements:
+def _packaging_from_input(inp: PackagingElementInput, product_id: UUID) -> ProductElements:
     attrs: dict = {}
     if inp.grouping is not None:
         attrs["grouping"] = inp.grouping
     return ProductElements(
         product_id=product_id,
-        company_id=company_id,
         classification_code=_PACKAGING,
         type_code=inp.type_code,
         material_code=inp.material_code,
@@ -145,7 +144,7 @@ async def upsert_packaging_elements(
     _delete_by_classification(db, product_id, _PACKAGING)
     created = []
     for inp in items:
-        elem = _packaging_from_input(inp, product_id, current_user.company_id)
+        elem = _packaging_from_input(inp, product_id)
         db.add(elem)
         db.flush()
         db.refresh(elem)
@@ -212,7 +211,6 @@ async def upsert_scp_element(
         attrs["product_value"] = float(item.product_value)
     elem = ProductElements(
         product_id=product_id,
-        company_id=current_user.company_id,
         classification_code=_SCP,
         attributes=attrs,
     )
@@ -271,7 +269,6 @@ async def upsert_tire_element(
     _delete_by_classification(db, product_id, _TIRE)
     elem = ProductElements(
         product_id=product_id,
-        company_id=current_user.company_id,
         classification_code=_TIRE,
         weight_grams=item.weight_grams,
         attributes={},
@@ -342,7 +339,6 @@ async def upsert_transport_pack_element(
         attrs["thickness_micron"] = float(item.thickness_micron)
     elem = ProductElements(
         product_id=product_id,
-        company_id=current_user.company_id,
         classification_code=_TRANSPORT_PACK,
         name=item.name,
         material_code=item.material_code,
@@ -417,7 +413,6 @@ async def upsert_oil_element(
         attrs["measure_unit"] = item.measure_unit
     elem = ProductElements(
         product_id=product_id,
-        company_id=current_user.company_id,
         classification_code=_OIL,
         attributes=attrs,
     )
@@ -493,7 +488,6 @@ async def upsert_eee_element(
         attrs["category_code"] = item.category_code
     elem = ProductElements(
         product_id=product_id,
-        company_id=current_user.company_id,
         classification_code=_EEE,
         weight_grams=item.weight_grams,
         attributes=attrs,
@@ -564,7 +558,6 @@ async def upsert_batteries_element(
         attrs["category_code"] = item.category_code
     elem = ProductElements(
         product_id=product_id,
-        company_id=current_user.company_id,
         classification_code=_BATTERIES,
         weight_grams=item.weight_grams,
         attributes=attrs,
@@ -648,7 +641,6 @@ async def upsert_sgr_element(
         attrs["diameter_mm"] = float(item.diameter_mm)
     elem = ProductElements(
         product_id=product_id,
-        company_id=current_user.company_id,
         classification_code=_SGR,
         material_code=item.material_code,
         weight_grams=item.weight_grams,
@@ -723,7 +715,6 @@ async def upsert_sup_element(
         attrs["percentage_RPET"] = float(item.percentage_RPET)
     elem = ProductElements(
         product_id=product_id,
-        company_id=current_user.company_id,
         classification_code=_SUP,
         weight_grams=item.weight_grams,
         attributes=attrs,

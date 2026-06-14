@@ -1,4 +1,4 @@
-"""Product element and reference models."""
+"""Product element model."""
 
 import uuid
 from datetime import datetime
@@ -11,19 +11,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
-    from app.models.company import Company
     from app.models.product import Product
 
 
 class ProductElements(Base):
-    """Company-owned product element model."""
+    """Product element model."""
 
     __tablename__ = "product_elements"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    company_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), ForeignKey("companies.id"), nullable=False, index=True
-    )
     product_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("products.id"), nullable=True, index=True
     )
@@ -39,6 +35,4 @@ class ProductElements(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
-    # Relationships
-    company: Mapped["Company"] = relationship("Company")
     product: Mapped["Product"] = relationship("Product")

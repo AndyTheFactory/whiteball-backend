@@ -94,7 +94,6 @@ async def create_product_element(
     _require_dictionary_value(db, item_data.material_code, "material_code")
 
     item = ProductElements(
-        company_id=current_user.company_id,
         product_id=product_id,
         **item_data.model_dump(),
     )
