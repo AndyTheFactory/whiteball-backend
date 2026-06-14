@@ -8,7 +8,7 @@ from app.api.deps import get_db
 from app.models.dictionary import DictionaryValue
 from app.schemas.dictionary import DictionaryValueResponse
 
-router = APIRouter(prefix="/dictionaries", tags=["dictionaries"])
+router = APIRouter(prefix="/dictionaries", tags=["Dictionaries"])
 
 
 @router.get("/{dictionary_type_code}/values", response_model=list[DictionaryValueResponse])

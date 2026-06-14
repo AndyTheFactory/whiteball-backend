@@ -32,7 +32,7 @@ def test_list_product_elements_with_optional_classification_filter(
     client.post(
         f"/api/v1/products/{product_id}/elements",
         json={
-            "classification_code": "ambalaje",
+            "classification_code": "packaging",
             "type_code": "primary",
             "material_code": "other_plastics",
             "name": "Bottle",
@@ -59,12 +59,12 @@ def test_list_product_elements_with_optional_classification_filter(
 
     filtered = client.get(
         f"/api/v1/products/{product_id}/elements",
-        params={"classification_code": "ambalaje"},
+        params={"classification_code": "packaging"},
         headers=auth_headers,
     )
     assert filtered.status_code == 200
     assert filtered.json()["total"] == 1
-    assert filtered.json()["items"][0]["classification_code"] == "ambalaje"
+    assert filtered.json()["items"][0]["classification_code"] == "packaging"
 
 
 def test_patch_requires_classification_code(
@@ -76,7 +76,7 @@ def test_patch_requires_classification_code(
     create_response = client.post(
         f"/api/v1/products/{product_id}/elements",
         json={
-            "classification_code": "ambalaje",
+            "classification_code": "packaging",
             "type_code": "primary",
             "material_code": "other_plastics",
             "name": "Bottle",
@@ -96,7 +96,7 @@ def test_patch_requires_classification_code(
 
     valid_patch = client.patch(
         f"/api/v1/products/{product_id}/elements/{item_id}",
-        params={"classification_code": "ambalaje"},
+        params={"classification_code": "packaging"},
         json={"name": "Updated Bottle"},
         headers=auth_headers,
     )
@@ -111,7 +111,7 @@ def test_delete_all_by_product_and_classification(
     """Delete endpoint removes all elements matching product_id and classification_code."""
     product_id = _create_product(client, auth_headers)
 
-    for classification_code in ("ambalaje", "ambalaje", "scp"):
+    for classification_code in ("packaging", "packaging", "scp"):
         client.post(
             f"/api/v1/products/{product_id}/elements",
             json={
@@ -126,7 +126,7 @@ def test_delete_all_by_product_and_classification(
 
     delete_response = client.delete(
         f"/api/v1/products/{product_id}/elements",
-        params={"classification_code": "ambalaje"},
+        params={"classification_code": "packaging"},
         headers=auth_headers,
     )
     assert delete_response.status_code == 204
@@ -166,7 +166,7 @@ def test_product_elements_are_company_scoped(
     create_response = client.post(
         f"/api/v1/products/{product_id}/elements",
         json={
-            "classification_code": "ambalaje",
+            "classification_code": "packaging",
             "type_code": "primary",
             "material_code": "other_plastics",
             "name": "Unauthorized",

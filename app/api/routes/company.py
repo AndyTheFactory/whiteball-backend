@@ -13,7 +13,7 @@ from app.models.user import User
 from app.schemas.common import PaginatedResponse
 from app.schemas.company import CompanyCreate, CompanyResponse, CompanyUpdate
 
-router = APIRouter(prefix="/companies", tags=["companies"])
+router = APIRouter(prefix="/companies", tags=["Companies"])
 
 
 @router.get("", response_model=PaginatedResponse)

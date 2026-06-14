@@ -16,8 +16,9 @@ def import_all_models() -> None:
         "app.models.dictionary",
         "app.models.user",
         "app.models.product",
-        "app.models.packaging",
-        "app.models.product_packaging_association",
+        "app.models.product_elements",
+        "app.models.product_classification",
+        "app.models.reference_table",
     ):
         import_module(module)
 

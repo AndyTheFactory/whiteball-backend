@@ -7,15 +7,33 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
-from app.api.routes.packaging import _require_dictionary_value
-from app.core.exceptions import NotFoundException
-from app.models.packaging import PackagingItem
+from app.core.exceptions import NotFoundException, ValidationException
+from app.models.dictionary import DictionaryValue
 from app.models.product import Product
+from app.models.product_elements import ProductElements
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
 from app.schemas.packaging import ProductElementCreate, ProductElementResponse, ProductElementUpdate
 
-router = APIRouter(prefix="/products", tags=["product-elements"])
+router = APIRouter(prefix="/products", tags=["Generic Product Elements"])
+
+
+def _require_dictionary_value(db: Session, code: str, dictionary_type_code: str) -> DictionaryValue:
+    """Ensure provided dictionary code exists in the expected dictionary type."""
+    value = (
+        db.execute(
+            select(DictionaryValue).where(
+                (DictionaryValue.code == code) & (DictionaryValue.dictionary_type_code == dictionary_type_code)
+            )
+        )
+        .scalars()
+        .first()
+    )
+
+    if not value:
+        raise ValidationException(f"Unknown {dictionary_type_code.replace('_', ' ')}: {code}")
+
+    return value
 
 
 def _get_owned_product(db: Session, product_id: UUID, current_user: User) -> Product:
@@ -42,12 +60,12 @@ async def list_product_elements(
     """List product elements for a product, optionally filtered by classification code."""
     _get_owned_product(db, product_id, current_user)
 
-    stmt = select(PackagingItem).where(PackagingItem.product_id == product_id)
-    count_stmt = select(func.count()).select_from(PackagingItem).where(PackagingItem.product_id == product_id)
+    stmt = select(ProductElements).where(ProductElements.product_id == product_id)
+    count_stmt = select(func.count()).select_from(ProductElements).where(ProductElements.product_id == product_id)
 
     if classification_code:
-        stmt = stmt.where(PackagingItem.classification_code == classification_code)
-        count_stmt = count_stmt.where(PackagingItem.classification_code == classification_code)
+        stmt = stmt.where(ProductElements.classification_code == classification_code)
+        count_stmt = count_stmt.where(ProductElements.classification_code == classification_code)
 
     total = db.execute(count_stmt).scalar() or 0
     items = db.execute(stmt.limit(limit).offset(offset)).scalars().all()
@@ -75,7 +93,7 @@ async def create_product_element(
         _require_dictionary_value(db, item_data.type_code, "type_code")
     _require_dictionary_value(db, item_data.material_code, "material_code")
 
-    item = PackagingItem(
+    item = ProductElements(
         company_id=current_user.company_id,
         product_id=product_id,
         **item_data.model_dump(),
@@ -102,10 +120,10 @@ async def update_product_element(
 
     item = (
         db.execute(
-            select(PackagingItem).where(
-                (PackagingItem.id == item_id)
-                & (PackagingItem.product_id == product_id)
-                & (PackagingItem.classification_code == classification_code)
+            select(ProductElements).where(
+                (ProductElements.id == item_id)
+                & (ProductElements.product_id == product_id)
+                & (ProductElements.classification_code == classification_code)
             )
         )
         .scalars()
@@ -144,8 +162,9 @@ async def delete_product_elements_by_classification(
 
     items = (
         db.execute(
-            select(PackagingItem).where(
-                (PackagingItem.product_id == product_id) & (PackagingItem.classification_code == classification_code)
+            select(ProductElements).where(
+                (ProductElements.product_id == product_id)
+                & (ProductElements.classification_code == classification_code)
             )
         )
         .scalars()

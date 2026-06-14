@@ -3,12 +3,12 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
-from app.models.packaging import WhiteballPackagingItem
+from app.models.reference_table import WhiteballPackagingItem
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
 from app.schemas.packaging import WhiteballPackagingItemResponse
 
-router = APIRouter(tags=["reference database"])
+router = APIRouter(tags=["Reference Database"])
 
 
 @router.get("/whiteball-packaging-items", response_model=PaginatedResponse)

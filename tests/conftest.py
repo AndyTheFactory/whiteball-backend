@@ -14,7 +14,7 @@ from app.db.base import Base
 from app.main import create_app
 from app.models.company import Company
 from app.models.dictionary import DictionaryType, DictionaryValue
-from app.models.packaging import WhiteballPackagingItem
+from app.models.reference_table import WhiteballPackagingItem
 from app.models.user import User
 
 # Use in-memory SQLite for tests
@@ -95,7 +95,7 @@ def seed_dictionary_data(db: Session) -> None:
             DictionaryValue(
                 id=uuid.uuid4(),
                 dictionary_type_code="classification_code",
-                code="ambalaje",
+                code="packaging",
                 name_ro="Ambalaje",
                 name_en="Packaging",
                 is_active=True,

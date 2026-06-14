@@ -12,7 +12,7 @@ from app.core.security import create_access_token, verify_password
 from app.models.user import User
 from app.schemas.auth import LoginRequest, LoginResponse, UserResponse
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/login", response_model=LoginResponse)

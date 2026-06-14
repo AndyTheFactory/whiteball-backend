@@ -14,7 +14,7 @@ seed_data = {
         {
             "id": "11111111-1112-4111-8111-111111111111",
             "dictionary_type_code": "classification_code",
-            "code": "ambalaje",
+            "code": "packaging",
             "name_ro": "Ambalaje",
             "name_en": "Packaging",
             "is_active": True,
@@ -313,7 +313,7 @@ seed_data = {
         {
             "id": "11111111-1116-4111-8111-111111111111",
             "product_id": "11111111-1115-4111-8111-111111111111",
-            "classification_code": "ambalaje",
+            "classification_code": "packaging",
             "is_active": True,
         }
     ],
@@ -321,7 +321,7 @@ seed_data = {
         {
             "id": "11111111-1117-4111-8111-111111111111",
             "product_id": "11111111-1115-4111-8111-111111111111",
-            "classification_code": "ambalaje",
+            "classification_code": "packaging",
             "type_code": "primary",
             "material_code": "other_plastics",
             "name": "Example Element",

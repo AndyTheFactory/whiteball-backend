@@ -9,8 +9,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
-    from app.models.packaging import PackagingItem
     from app.models.product_classification import ProductClassification
+    from app.models.product_elements import ProductElements
 
 
 class DictionaryType(Base):
@@ -44,12 +44,12 @@ class DictionaryValue(Base):
     product_classifications: Mapped[list["ProductClassification"]] = relationship(
         "ProductClassification", backref="dictionary_value"
     )
-    product_elements_as_classification: Mapped[list["PackagingItem"]] = relationship(
-        "PackagingItem", foreign_keys="PackagingItem.classification_code", backref="classification_value"
+    product_elements_as_classification: Mapped[list["ProductElements"]] = relationship(
+        "ProductElements", foreign_keys="ProductElements.classification_code", backref="classification_value"
     )
-    product_elements_as_type: Mapped[list["PackagingItem"]] = relationship(
-        "PackagingItem", foreign_keys="PackagingItem.type_code", backref="type_value"
+    product_elements_as_type: Mapped[list["ProductElements"]] = relationship(
+        "ProductElements", foreign_keys="ProductElements.type_code", backref="type_value"
     )
-    product_elements_as_material: Mapped[list["PackagingItem"]] = relationship(
-        "PackagingItem", foreign_keys="PackagingItem.material_code", backref="material_value"
+    product_elements_as_material: Mapped[list["ProductElements"]] = relationship(
+        "ProductElements", foreign_keys="ProductElements.material_code", backref="material_value"
     )
