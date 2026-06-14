@@ -368,7 +368,7 @@ def upgrade() -> None:
             sa.table(
                 "product_elements",
                 sa.Column("id", postgresql.UUID(as_uuid=True)),
-                sa.Column("company_id", postgresql.UUID(as_uuid=True)),
+                sa.Column("product_id", postgresql.UUID(as_uuid=True)),
                 sa.Column("classification_code", sa.String(50)),
                 sa.Column("type_code", sa.String(50)),
                 sa.Column("material_code", sa.String(50)),
@@ -404,7 +404,7 @@ def downgrade() -> None:
     op.drop_index("ix_product_classifications_product_id", table_name="product_classifications")
     op.drop_table("product_classifications")
 
-    op.drop_index("ix_product_elements_company_id", table_name="product_elements")
+    op.drop_index("ix_product_elements_product_id", table_name="product_elements")
     op.drop_table("product_elements")
 
     op.drop_index("ix_products_company_sku", table_name="products")
