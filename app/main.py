@@ -35,7 +35,7 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
 
     # Health check endpoint
-    @app.get("/health")
+    @app.get("/health", tags=["Health Check"], include_in_schema=False)
     async def health_check():
         """Health check endpoint."""
         return {"status": "ok"}
