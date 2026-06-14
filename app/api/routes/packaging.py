@@ -10,7 +10,7 @@ from app.api.deps import get_current_user, get_db
 from app.core.exceptions import NotFoundException, ValidationException
 from app.models.dictionary import DictionaryValue
 from app.models.packaging import PackagingItem
-from app.models.product_packaging_association import ProductClassification
+from app.models.product_classification import ProductClassification
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
 from app.schemas.packaging import (

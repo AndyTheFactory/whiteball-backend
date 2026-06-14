@@ -11,7 +11,7 @@ from app.api.deps import get_current_user, get_db
 from app.api.routes.packaging import _classification_response, _require_dictionary_value
 from app.core.exceptions import DuplicateException, NotFoundException
 from app.models.product import Product
-from app.models.product_packaging_association import ProductClassification
+from app.models.product_classification import ProductClassification
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
 from app.schemas.packaging import (

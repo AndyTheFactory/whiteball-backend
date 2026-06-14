@@ -12,7 +12,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.company import Company
-    from app.models.product_packaging_association import ProductClassification
+    from app.models.product_classification import ProductClassification
 
 
 class Product(Base):
